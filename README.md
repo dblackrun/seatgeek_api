@@ -15,6 +15,12 @@ cd path_to_folder
 git clone https://github.com/dblackrun/seatgeek_api.git
 ```
 
+
+* Enter your client id in event.py
+```
+CLIENT_ID = your client id here
+```
+
 Example: Search for Golden State Warriors games and print title and lowest price of all results
 
 ```
