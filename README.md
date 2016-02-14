@@ -7,7 +7,7 @@ Built using python 2.7
 
 ```
 cd path_to_folder
-git clone https://blackport@bitbucket.org/blackport/seatgeek_api.git
+git clone https://github.com/dblackrun/seatgeek_api.git
 ```
 
 Example: Search for Golden State Warriors games and print title and lowest price of all results
