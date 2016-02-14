@@ -1,6 +1,9 @@
 # Seatgeek.com API access
 
 See [here](http://platform.seatgeek.com/) for the SeatGeek platform documentation.
+
+See [SeatGeek API terms](https://seatgeek.com/api-terms) before using.
+
 Built using python 2.7
 
 * Clone the repository
