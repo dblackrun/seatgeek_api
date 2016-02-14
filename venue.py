@@ -1,7 +1,9 @@
 import requests
 import json
+import event
 
 VENUE_BASE_URL = "https://api.seatgeek.com/2/venues"
+VENUES_PER_PAGE = 500
 
 class Venue:
     def __init__(self, venue_data):
@@ -22,36 +24,38 @@ def get_venue_data(venue_id):
     return Venue(venue_data)
 
 def get_venues_for_city(city):
-    parameters = {'city': city, 'per_page': 250}
-    venues = requests.get(VENUE_BASE_URL, params=parameters).json()
-    total_results = venues['meta']['total']
-    # TODO: handle more than 250 results
-    return [Venue(venue) for venue in venues['venues']]
+    parameters = {'city': city}
+    return get_venues(parameters)
 
 def get_venues_for_state(state):
-    parameters = {'state': state, 'per_page': 250}
-    venues = requests.get(VENUE_BASE_URL, params=parameters).json()
-    total_results = venues['meta']['total']
-    # TODO: handle more than 250 results
-    return [Venue(venue) for venue in venues['venues']]
+    parameters = {'state': state}
+    return get_venues(parameters)
 
 def get_venues_for_country(country):
-    parameters = {'country': country, 'per_page': 250}
-    venues = requests.get(VENUE_BASE_URL, params=parameters).json()
-    total_results = venues['meta']['total']
-    # TODO: handle more than 250 results
-    return [Venue(venue) for venue in venues['venues']]
+    parameters = {'country': country}
+    return get_venues(parameters)
 
 def get_venues_for_postal_code(postal_code):
-    parameters = {'postal_code': postal_code, 'per_page': 250}
-    venues = requests.get(VENUE_BASE_URL, params=parameters).json()
-    total_results = venues['meta']['total']
-    # TODO: handle more than 250 results
-    return [Venue(venue) for venue in venues['venues']]
+    parameters = {'postal_code': postal_code}
+    return get_venues(parameters)
 
 def get_venues_for_query(query):
-    parameters = {'q': query, 'per_page': 250}
+    parameters = {'q': query}
+    return get_venues(parameters)
+
+def get_venues(parameters):
+    parameters['client_id'] = event.CLIENT_ID
+    parameters['per_page'] = VENUES_PER_PAGE
     venues = requests.get(VENUE_BASE_URL, params=parameters).json()
     total_results = venues['meta']['total']
-    # TODO: handle more than 250 results
-    return [Venue(venue) for venue in venues['venues']]
+    page = 1
+    all_venues = []
+    for venue in venues['venues']:
+        all_venues.append(Venue(venue))
+    while len(all_venues) < total_results:
+        page += 1
+        parameters['page'] = page
+        venues = requests.get(VENUE_BASE_URL, params=parameters).json()
+        for venue in venues['venues']:
+            all_venues.append(Venue(venue))
+    return all_venues

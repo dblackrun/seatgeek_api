@@ -1,10 +1,11 @@
-# documentation http://platform.seatgeek.com/
 import requests
 import json
 from venue import Venue
 from performer import Performer
 
 EVENT_BASE_URL = "https://api.seatgeek.com/2/events"
+EVENTS_PER_PAGE = 500
+CLIENT_ID = "NDIwNzAzNXwxNDU1Mzg0MTk1"
 
 class Event:
     def __init__(self, event_data):
@@ -32,77 +33,62 @@ def get_event_data_for_id(event_id):
     return Event(response)
 
 def get_event_data_for_slug(slug):
-    parameters = {'performers.slug': slug, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'performers.slug': slug}
+    return get_events(parameters)
 
 def get_event_data_for_date(date):
-    parameters = {'datetime_local': date, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'datetime_local': date}
+    return get_events(parameters)
 
 def get_event_data_for_date_from(date):
-    parameters = {'datetime_local.gte': date, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'datetime_local.gte': date}
+    return get_events(parameters)
 
 def get_event_data_for_date_to(date):
-    parameters = {'datetime_local.lte': date, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'datetime_local.lte': date}
+    return get_events(parameters)
 
 def get_event_data_for_date_range(start_date, end_date):
-    parameters = {'datetime_local.gte': start_date, 'datetime_local.lte': end_date, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'datetime_local.gte': start_date, 'datetime_local.lte': end_date}
+    return get_events(parameters)
 
 def get_event_data_for_venue_id(venue_id):
-    parameters = {'venue.id': venue_id, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'venue.id': venue_id}
+    return get_events(parameters)
 
 def get_event_data_for_venue_state(venue_state):
-    parameters = {'venue.state': venue_state, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'venue.state': venue_state}
+    return get_events(parameters)
 
 def get_event_data_for_venue_city(venue_city):
-    parameters = {'venue.city': venue_city, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'venue.city': venue_city}
+    return get_events(parameters)
 
 def get_event_data_for_query(query):
-    parameters = {'q': query, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'q': query}
+    return get_events(parameters)
 
 def get_event_data_for_taxonimy_name(name):
-    parameters = {'taxonomies.name': name, 'per_page': 250}
-    events = requests.get(EVENT_BASE_URL, params=parameters).json()
-    total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    parameters = {'taxonomies.name': name}
+    return get_events(parameters)
 
 def get_event_data_for_taxonimy_id(taxonomy_id):
-    parameters = {'taxonomies.id': taxonomy_id, 'per_page': 250}
+    parameters = {'taxonomies.id': taxonomy_id}
+    return get_events(parameters)
+
+def get_events(parameters):
+    parameters['client_id'] = CLIENT_ID
+    parameters['per_page'] = EVENTS_PER_PAGE
     events = requests.get(EVENT_BASE_URL, params=parameters).json()
     total_results = events['meta']['total']
-    # TODO: handle more than 250 results
-    return [Event(event) for event in events['events']]
+    page = 1
+    all_events = []
+    for event in events['events']:
+        all_events.append(Event(event))
+    while len(all_events) < total_results:
+        page += 1
+        parameters['page'] = page
+        events = requests.get(EVENT_BASE_URL, params=parameters).json()
+        for event in events['events']:
+            all_events.append(Event(event))
+    return all_events

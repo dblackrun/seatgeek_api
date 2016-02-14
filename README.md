@@ -4,6 +4,8 @@ See [here](http://platform.seatgeek.com/) for the SeatGeek platform documentatio
 
 See [SeatGeek API terms](https://seatgeek.com/api-terms) before using.
 
+Get a client id from [here](https://seatgeek.com/account/develop)
+
 Built using python 2.7
 
 * Clone the repository

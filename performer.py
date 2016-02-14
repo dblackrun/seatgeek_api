@@ -1,7 +1,9 @@
 import requests
 import json
+import event
 
 PERFORMER_BASE_URL = "https://api.seatgeek.com/2/performers"
+PERFORMERS_PER_PAGE = 500
 
 class Performer:
     def __init__(self, performer_data):
@@ -27,13 +29,26 @@ def get_performer_data_for_slug(slug):
     return Performer(performer_data['performers'][0])
 
 def get_performer_data_for_taxonomy_name(taxonomy_name):
-    parameters = {'taxonomies.name': taxonomy_name, 'per_page': 250}
-    performers = requests.get(PERFORMER_BASE_URL, params=parameters).json()
-    # TODO: handle more than 250 results
-    return [Performer(performer) for performer in performers['performers']]
+    parameters = {'taxonomies.name': taxonomy_name}
+    return get_performers(parameters)
 
 def get_performer_data_for_taxonomy_id(taxonomy_id):
-    parameters = {'taxonomies.id': taxonomy_id, 'per_page': 250}
+    parameters = {'taxonomies.id': taxonomy_id}
+    return get_performers(parameters)
+
+def get_performers(parameters):
+    parameters['client_id'] = event.CLIENT_ID
+    parameters['per_page'] = PERFORMERS_PER_PAGE
     performers = requests.get(PERFORMER_BASE_URL, params=parameters).json()
-    # TODO: handle more than 250 results
-    return [Performer(performer) for performer in performers['performers']]
+    total_results = performers['meta']['total']
+    page = 1
+    all_performers = []
+    for performer in performers['performers']:
+        all_performers.append(Performer(performer))
+    while len(all_performers) < total_results:
+        page += 1
+        parameters['page'] = page
+        performers = requests.get(PERFORMER_BASE_URL, params=parameters).json()
+        for performer in performers['performers']:
+            all_performers.append(Performer(performer))
+    return all_performers
